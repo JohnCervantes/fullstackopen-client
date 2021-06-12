@@ -1,0 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Limelight&family=Roboto&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.headline{
+    @apply 
+    text-green-500 
+    text-4xl 
+    font-black 
+    pt-3 pb-1;
+}
+
+.content{
+    @apply
+    text-lg 
+    text-justify 
+    p-2;
+}
