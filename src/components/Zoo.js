@@ -1,44 +1,65 @@
-import React, {useEffect} from "react";
-import { gql, useQuery, useReactiveVar} from '@apollo/client';
+import React, { useEffect, useState } from "react";
+import { gql, useQuery } from "@apollo/client";
 import { Link } from "react-router-dom";
-import {allAnimalsVar} from '..'
-
+import { animalsVar, initialDataLoad } from "../cache";
 
 const ALL_ANIMALS = gql`
-query {
-  allAnimals  {
-    _id
-    age
-    color
-    name
+  query {
+    animals {
+      _id
+      age
+      color
+      name
+    }
   }
-}
-`
+`;
+
+const ALL_ANIMALS_VAR = gql`
+  query {
+    animalsVar @client {
+      _id
+      age
+      color
+      name
+    }
+  }
+`;
+
+const INITIAL_DATA_LOAD_VAR = gql`
+  query {
+    initialDataLoadVar @client
+  }
+`;
 
 function Zoo() {
-  const { loading, error, data } = useQuery(ALL_ANIMALS)
-  const allAnimals = useReactiveVar(allAnimalsVar)
+  const { loading, error, data } = useQuery(ALL_ANIMALS);
+  const { data: animalsVarData } = useQuery(ALL_ANIMALS_VAR);
+  const { data: initialDataLoadData } = useQuery(INITIAL_DATA_LOAD_VAR);
 
   useEffect(() => {
-    if (loading)  {
-      return <div>loading...</div>
-    } 
-    if(error) console.log(error)
-    allAnimalsVar(data.allAnimals)
-  }, [data])  
+    if (loading) {
+      return <div>loading...</div>;
+    }
+    if (error) console.log(error);
+    if (!initialDataLoadData.initialDataLoadVar) {
+      animalsVar(data.animals);
+      initialDataLoad(true);
+    }
+  }, [data, animalsVarData]);
 
-  function handleAddAnimal(e) {
-    allAnimalsVar([...allAnimalsVar(), {_id: "123", name:'elephant'}])
+  function handleAddAnimal() {
+    animalsVar([
+      ...animalsVarData.animalsVar,
+      { _id: "123", name: "elephant", age: "5", color: "green" },
+    ]);
   }
 
   return (
     <div className="w-10/12 m-auto text-center">
       <div className="flex">
-      <Link to="/animal/1">click me</Link>
+        <Link to="/animal/1">click me</Link>
         <div>
-          <h1 className="headline">
-            left content
-          </h1>
+          <h1 className="headline">left content</h1>
           <p className="content">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean nec
             scelerisque mauris, quis congue arcu. Quisque tincidunt consectetur
@@ -67,9 +88,7 @@ function Zoo() {
           </p>
         </div>
         <div>
-          <h1 className="headline">
-            right content
-          </h1>
+          <h1 className="headline">right content</h1>
           <p className="content">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean nec
             scelerisque mauris, quis congue arcu. Quisque tincidunt consectetur
@@ -99,14 +118,16 @@ function Zoo() {
         </div>
       </div>
       <div className="text-center text-yellow-500 text-9xl">
-        {allAnimals.map((animal) => {return <p key={animal._id}>{animal.name   + ', '}</p>})}
-        <button onClick={(e) => handleAddAnimal(e)}>
-          Click me
-        </button>
+        {animalsVarData.animalsVar.map((animal) => {
+          return <p key={animal._id}>{animal.name + ", "}</p>;
+        })}
+        <button onClick={handleAddAnimal}>Click me</button>
       </div>
-      <div> 
+      <div>
         <p>data from db</p>
-        {allAnimals.map((item)=><p key={item._id}>{item.name}</p>)}
+        {animalsVarData.animalsVar.map((item) => (
+          <p key={item._id}>{item.name}</p>
+        ))}
       </div>
     </div>
   );

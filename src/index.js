@@ -11,15 +11,15 @@ import {
 } from "@apollo/client";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 import Details from "./components/Details";
+import {cache} from './cache';
 
 export const client = new ApolloClient({
-  cache: new InMemoryCache(),
+  cache: cache,
   link: new HttpLink({
-    uri: "https://dry-stream-85503.herokuapp.com/graphql",
+    uri: "http://localhost:8080/graphql",
   }),
 });
 
-export const allAnimalsVar = client.cache.makeVar([]);
 
 ReactDOM.render(
   <ApolloProvider client={client}>
