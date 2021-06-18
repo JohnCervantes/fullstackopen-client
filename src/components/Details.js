@@ -1,27 +1,25 @@
 import React, { useState, useEffect } from "react";
-import {gql, useQuery} from '@apollo/client';
-import {animalsVar} from "../cache";
+import {useMutation, useQuery} from '@apollo/client';
 import { Link } from "react-router-dom";
-
-
-const ALL_ANIMALS_VAR = gql`
-query {
-  animalsVar @client{
-    _id
-    age
-    color
-    name
-  }
-}
-`
+import {
+  ALL_ANIMALS_VAR
+} from "../operations/query";
+import { ADD_ANIMAL, addAnimal } from "../operations/mutation";
 
 
 function Details() {
   const { loading, error, data } = useQuery(ALL_ANIMALS_VAR)
+  const [addAnimalMut] = useMutation(ADD_ANIMAL);
  
-  function handleAddAnimal() {
-    animalsVar([...data.animalsVar, {_id: "dsadasdasdas", name: 'test', age: 'test', color: "test"}])
-  }
+  async function handleAddAnimal() {
+    try {
+      const { data } = await addAnimalMut({
+        variables: { name: 'cat', age: 10, color: "yellow"}
+      });
+      addAnimal(data.addAnimal);
+    } catch (e) {
+      console.log(e);
+    }  }
 
   return (
     <div>

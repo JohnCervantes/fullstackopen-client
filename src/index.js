@@ -16,7 +16,8 @@ import {cache} from './cache';
 export const client = new ApolloClient({
   cache: cache,
   link: new HttpLink({
-    uri: "http://localhost:8080/graphql",
+    uri:"https://dry-stream-85503.herokuapp.com/graphql",
+    //uri: "http://localhost:8080/graphql",
   }),
 });
 

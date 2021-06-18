@@ -1,40 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { gql, useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { Link } from "react-router-dom";
-import { animalsVar, initialDataLoad } from "../cache";
-
-const ALL_ANIMALS = gql`
-  query {
-    animals {
-      _id
-      age
-      color
-      name
-    }
-  }
-`;
-
-const ALL_ANIMALS_VAR = gql`
-  query {
-    animalsVar @client {
-      _id
-      age
-      color
-      name
-    }
-  }
-`;
-
-const INITIAL_DATA_LOAD_VAR = gql`
-  query {
-    initialDataLoadVar @client
-  }
-`;
+import {
+  ALL_ANIMALS,
+  ALL_ANIMALS_VAR,
+  INITIAL_DATA_LOAD_VAR,
+} from "../operations/query";
+import { ADD_ANIMAL, addAnimal, setAnimals, setInitialDataLoad } from "../operations/mutation";
 
 function Zoo() {
   const { loading, error, data } = useQuery(ALL_ANIMALS);
   const { data: animalsVarData } = useQuery(ALL_ANIMALS_VAR);
   const { data: initialDataLoadData } = useQuery(INITIAL_DATA_LOAD_VAR);
+  const [addAnimalMut] = useMutation(ADD_ANIMAL);
 
   useEffect(() => {
     if (loading) {
@@ -42,16 +20,20 @@ function Zoo() {
     }
     if (error) console.log(error);
     if (!initialDataLoadData.initialDataLoadVar) {
-      animalsVar(data.animals);
-      initialDataLoad(true);
+      setAnimals(data.animals);
+      setInitialDataLoad(true);
     }
   }, [data, animalsVarData]);
 
-  function handleAddAnimal() {
-    animalsVar([
-      ...animalsVarData.animalsVar,
-      { _id: "123", name: "elephant", age: "5", color: "green" },
-    ]);
+  async function handleAddAnimal() {
+    try {
+      const { data } = await addAnimalMut({
+        variables: {name: "dog", age: 5, color: "green"}
+      });
+      addAnimal(data.addAnimal);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   return (
